@@ -24,6 +24,26 @@ Compose service `looping-sample` starts infinitely looping stream from sample vi
 
 Compose service `concatenated-sample` starts a stream with every video from `samples/input_files` directory in sequential order. Script assumes there are only videos in the directory, and these videos are all in the same format (able to be concatenated without reencoding).
 
+## RTSPS (Secure RTSP)
+
+RTSPS (RTSP over TLS) is available on port `322` using an auto-generated self-signed certificate. The certificate is created on first run and persisted in a Docker named volume.
+
+Plain RTSP remains available on port `8554`. Both work simultaneously.
+
+Connection URL: `rtsps://machine-ip:322/<stream-name>`
+
+Streams require authentication. Default credentials: `bblp` / `11258023`
+
+Since the certificate is self-signed, clients need to disable certificate verification:
+
+```bash
+# VLC
+vlc --rtsp-tcp rtsps://bblp:11258023@machine-ip:322/streaming/live/1 --no-ssl-verify
+
+# FFplay (TLS verification is off by default)
+ffplay -rtsp_transport tcp rtsps://bblp:11258023@machine-ip:322/streaming/live/1
+```
+
 ## Additional Configuration
 
 To have a stable IP, which is convenient for development purposes, in Linux, you can set up a dummy

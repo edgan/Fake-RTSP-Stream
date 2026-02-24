@@ -1,0 +1,25 @@
+###############################################
+# Authentication
+###############################################
+
+authMethod: internal
+
+authInternalUsers:
+  # Allow FFmpeg containers to publish without credentials
+  - user: any
+    pass: ""
+    permissions:
+      - action: publish
+
+  # Authenticated reader
+  - user: bblp
+    pass: "11258023"
+    permissions:
+      - action: read
+
+###############################################
+# Paths
+###############################################
+
+paths:
+  all_others:
