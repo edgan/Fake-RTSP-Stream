@@ -61,7 +61,7 @@ services:
       - rtsp-server
     volumes:
       - ./samples/input_files/:/tmp/
-    command: -re -stream_loop -1 -i /tmp/testsrc_01.mpg -c:v libx264 -an -f rtsp rtsp://rtsp-server:8554/streaming/live/1
+    command: -re -stream_loop -1 -i /tmp/testsrc_01.mpg -vf scale=1920:1080 -c:v libx264 -an -f rtsp rtsp://rtsp-server:8554/streaming/live/1
 
   prepare-input-files:
     image: python:slim-bullseye
