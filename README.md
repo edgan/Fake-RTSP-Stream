@@ -1,5 +1,7 @@
 # Fake RTSP Stream
 
+Modified Fake-RTSP-Stream to emulate a non-P1 series Bambu printer's RTSP stream
+
 ## Requirements:
 
 - docker installed
