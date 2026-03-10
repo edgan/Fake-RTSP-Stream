@@ -17,42 +17,28 @@ services:
     ports:
       - "1935:1935"
       - "8554:8554"
-      - "322:8322"
       - "8888:8888"
     environment:
       - MTX_PROTOCOLS=tcp
-      - MTX_RTSPENCRYPTION=optional
-      - MTX_RTSPSERVERKEY=/certs/server.key
-      - MTX_RTSPSERVERCERT=/certs/server.crt
     image: bluenviron/mediamtx
     volumes:
-      - certs:/certs:ro
       - ./mediamtx.yml:/mediamtx.yml:ro
+
+  tls-proxy:
+    restart: unless-stopped
+    image: alpine/socat
+    ports:
+      - "322:8322"
+    volumes:
+      - certs:/certs:ro
+    command: OPENSSL-LISTEN:8322,cert=/certs/server.crt,key=/certs/server.key,verify=0,reuseaddr,fork TCP:rtsp-server:8554
     depends_on:
       generate-certs:
         condition: service_completed_successfully
+      rtsp-server:
+        condition: service_started
 
-#  webcam:
-#    restart: unless-stopped
-#    image: linuxserver/ffmpeg:version-4.4-cli
-#    devices:
-#      - /dev/video0:/dev/video0
-#    links:
-#      - "rtsp-server:rtsp-server"
-#    depends_on:
-#      - rtsp-server
-#    command: -f v4l2 -framerate 30 -video_size 1280x720 -i /dev/video0 -f rtsp rtsp://rtsp-server:8554/webcam
-
-  city-traffic:
-    restart: unless-stopped
-    image: linuxserver/ffmpeg:version-4.4-cli
-    links:
-      - "rtsp-server:rtsp-server"
-    depends_on:
-      - rtsp-server
-    command: -re -stream_loop -1 -i https://eu-central-1.linodeobjects.com/savant-data/demo/Free_City_Street_Footage.mp4 -c copy -bsf:v h264_mp4toannexb -f rtsp rtsp://rtsp-server:8554/city-traffic
-
-  local-loop:
+  bambu-live:
     restart: unless-stopped
     image: linuxserver/ffmpeg:version-4.4-cli
     links:
@@ -70,20 +56,6 @@ services:
        - ./samples/input_files/:/tmp/
        - ./scripts/list_input_files.py:/app/list_input_files.py
     command: python list_input_files.py /tmp/
-
-  concatenated-sample:
-    image: linuxserver/ffmpeg:version-4.4-cli
-    restart: unless-stopped
-    links:
-      - "rtsp-server:rtsp-server"
-    depends_on:
-      prepare-input-files:
-        condition: service_completed_successfully
-      rtsp-server:
-        condition: service_started
-    volumes:
-       - ./samples/input_files/:/tmp/
-    command: -re -f concat -i /tmp/concat.txt -c:v libx264 -an -f rtsp rtsp://rtsp-server:8554/concatenated-sample
 
 volumes:
   certs:
